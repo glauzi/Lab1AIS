@@ -6,9 +6,7 @@
     {
         static void Main(string[] args)
         {
-            var testService = new TestServices();
-            Console.WriteLine(testService.GetTestMessage());
-            Console.ReadLine();
+
         }
     }
 }
