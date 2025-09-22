@@ -4,7 +4,7 @@
     {
         public string GetTestMessage()
         {
-            return "Привет из Core! Библиотека работает!";
+            return "Привет из Core! Библиотека работает! Йооу";
         }
 
     }
