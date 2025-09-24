@@ -14,14 +14,15 @@ namespace BookManager.Core.Services
     {
         private readonly List<Book> _books = new();
         private int _nextId = 1;
-
+        
         /// <summary>
         /// Добавляет новую книгу в коллекцию
         /// </summary>
         /// <param name="book">Книга для добавления</param>
         public void CreateBook(Book book)
         {
-            throw new System.NotImplementedException();
+            book.Id = _nextId++;
+            _books.Add(book);
         }
 
         /// <summary>
@@ -30,7 +31,7 @@ namespace BookManager.Core.Services
         /// <returns>Список всех книг</returns>
         public List<Book> GetAllBooks()
         {
-            throw new System.NotImplementedException();
+            return new List<Book>(_books);
         }
 
         /// <summary>
@@ -40,7 +41,7 @@ namespace BookManager.Core.Services
         /// <returns>Найденная книга или null если не найдена</returns>
         public Book? GetBookById(int id)
         {
-            throw new System.NotImplementedException();
+            return _books.FirstOrDefault(book => book.Id == id);
         }
 
         /// <summary>
@@ -49,7 +50,14 @@ namespace BookManager.Core.Services
         /// <param name="bookToUpdate">Книга с обновленными данными</param>
         public void UpdateBook(Book bookToUpdate)
         {
-            throw new System.NotImplementedException();
+            var existingBook = GetBookById(bookToUpdate.Id);
+            if (existingBook != null)
+            {
+                existingBook.Title = bookToUpdate.Title;
+                existingBook.Author = bookToUpdate.Author;
+                existingBook.Genre = bookToUpdate.Genre;
+                existingBook.Year = bookToUpdate.Year;
+            }
         }
 
         /// <summary>
@@ -58,7 +66,11 @@ namespace BookManager.Core.Services
         /// <param name="id">Идентификатор книги для удаления</param>
         public void DeleteBookById(int id)
         {
-            throw new System.NotImplementedException();
+            var bookToRemove = GetBookById(id);
+            if (bookToRemove != null)
+            {
+                _books.Remove(bookToRemove);
+            }
         }
 
         /// <summary>
@@ -67,7 +79,8 @@ namespace BookManager.Core.Services
         /// <returns>Словарь где ключ - жанр, значение - список книг этого жанра</returns>
         public Dictionary<string, List<Book>> GroupBooksByGenre()
         {
-            throw new System.NotImplementedException();
+            return _books.GroupBy(book => book.Genre)
+                        .ToDictionary(group => group.Key, group => group.ToList());
         }
 
         /// <summary>
@@ -77,7 +90,7 @@ namespace BookManager.Core.Services
         /// <returns>Список книг, изданных после указанного года</returns>
         public List<Book> FindBooksPublishedAfterYear(int year)
         {
-            throw new System.NotImplementedException();
+            return _books.Where(book => book.Year > year).ToList();
         }
     }
 }

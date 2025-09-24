@@ -57,7 +57,7 @@ namespace BookManager.Core.Models
         /// <returns>Строка с информацией о книге</returns>
         public override string ToString()
         {
-            return $"{Id}: {Title}. Автор: {Author} ({Genre} - {Year}";
+            return $"{Id}: {Title}. Автор: {Author} ({Genre}, {Year}г.)";
         }
     }
 }
