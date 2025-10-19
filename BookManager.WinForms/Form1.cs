@@ -1,5 +1,5 @@
 using BookManager.Core.Services;
-using BookManager.Core.Models;
+using BookManager.Entities;
 using System;
 using System.Collections.Generic;
 namespace BookManager.WinForms

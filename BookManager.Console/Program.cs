@@ -1,11 +1,14 @@
 ﻿namespace BookManager.Console
 {
     using BookManager.Core;
-    using BookManager.Core.Models;
+    using BookManager.Entities;
     using BookManager.Core.Services;
     using System;
     using System.Text.RegularExpressions;
 
+    /// <summary>
+    /// Предоставляет консольный интерфейс для выполнения CRUD операций и бизнес-функций
+    /// </summary>
     internal class Program
     {
         private static Logic _logic = new Logic();

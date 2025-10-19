@@ -1,4 +1,4 @@
-﻿using BookManager.Core.Models;
+﻿using BookManager.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

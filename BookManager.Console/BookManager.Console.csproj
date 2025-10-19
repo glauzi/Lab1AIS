@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BookManager.Core\BookManager.Core.csproj" />
+    <ProjectReference Include="..\BookManager.Entities\BookManager.Entities.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,15 +1,16 @@
-﻿using System;
+﻿using BookManager.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BookManager.Core.Models
+namespace BookManager.Entities
 {
     /// <summary>
     /// Представляет книгу в библиотечной системеа
     /// </summary>
-    public class Book
+    public class Book : IDomainObject
     {
         /// <summary>
         /// Идентификатор книги
