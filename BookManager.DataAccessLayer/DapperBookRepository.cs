@@ -6,15 +6,28 @@ using System.Linq;
 
 namespace BookManager.DataAccessLayer
 {
+    /// <summary>
+    /// Реализация репозитория книг с использованием Dapper
+    /// Обеспечивает высокопроизводительную работу с базой данных через SQL-запросы
+    /// </summary>
     public class DapperBookRepository : IBookRepository
     {
         private readonly string _connectionString;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр репозитория Dapper
+        /// Устанавливает строку подключения к базе данных
+        /// </summary>
         public DapperBookRepository()
         {
             _connectionString = @"Server=GLAUZI\SQLEXPRESS;Database=BookManagerDB;Trusted_Connection=true;";
         }
 
+        /// <summary>
+        /// Добавляет новую книгу в базу данных через Dapper
+        /// Использует параметризованный SQL-запрос для безопасности
+        /// </summary>
+        /// <param name="book">Книга для добавления</param>
         public void Add(Book book)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -25,6 +38,10 @@ namespace BookManager.DataAccessLayer
             }
         }
 
+        /// <summary>
+        /// Удаляет книгу по идентификатору из базы данных через Dapper
+        /// </summary>
+        /// <param name="id">Идентификатор книги для удаления</param>
         public void Delete(int id)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -34,6 +51,10 @@ namespace BookManager.DataAccessLayer
             }
         }
 
+        /// <summary>
+        /// Возвращает все книги из базы данных через Dapper
+        /// </summary>
+        /// <returns>Список всех книг</returns>
         public List<Book> GetAll()
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -43,6 +64,11 @@ namespace BookManager.DataAccessLayer
             }
         }
 
+        /// <summary>
+        /// Находит книгу по идентификатору в базе данных через Dapper
+        /// </summary>
+        /// <param name="id">Идентификатор книги для поиска</param>
+        /// <returns>Найденная книга или null если не найдена</returns>
         public Book GetById(int id)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -52,6 +78,10 @@ namespace BookManager.DataAccessLayer
             }
         }
 
+        /// <summary>
+        /// Обновляет информацию о книге в базе данных через Dapper
+        /// </summary>
+        /// <param name="book">Книга с обновленными данными</param>
         public void Update(Book book)
         {
             using (var connection = new SqlConnection(_connectionString))
