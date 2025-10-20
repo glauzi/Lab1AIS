@@ -13,7 +13,7 @@ namespace BookManager.DataAccessLayer
         public DbSet<Book> Books { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=BookManagerDB;Trusted_Connection=true;");
+            optionsBuilder.UseSqlServer(@"Server=GLAUZI\SQLEXPRESS;Database=BookManagerDB;Trusted_Connection=true;");
         }
     }
 }
