@@ -14,7 +14,6 @@
         private static Logic _logic = new Logic();
         static void Main(string[] args)
         {
-            AddSampleData();
 
             bool exitRequested = false;
 
@@ -56,16 +55,7 @@
             }
             Console.WriteLine("До встречи в следующий раз!");
         }
-        /// <summary>
-        /// Добавляем изначальные данные
-        /// </summary>
-        private static void AddSampleData()
-        {
-            _logic.CreateBook(new Book(0, "Война и мир", "Лев Толстой", "Роман", 1869));
-            _logic.CreateBook(new Book(0, "Преступление и наказание", "Федор Достоевский", "Роман", 1866));
-            _logic.CreateBook(new Book(0, "Мастер и Маргарита", "Михаил Булгаков", "Фантастика", 1967));
-            _logic.CreateBook(new Book(0, "1984", "Джордж Оруэлл", "Антиутопия", 1949));
-        }
+
         /// <summary>
         /// Вывод меню
         /// </summary>

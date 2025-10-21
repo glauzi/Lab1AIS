@@ -20,7 +20,7 @@ namespace BookManager.DataAccessLayer
         /// </summary>
         public DapperBookRepository()
         {
-            _connectionString = @"Server=GLAUZI\SQLEXPRESS;Database=BookManagerDB;Trusted_Connection=true;";
+            _connectionString = @"Server=GLAUZI\SQLEXPRESS;Database=BookManagerDB;Trusted_Connection=true;TrustServerCertificate=true;";
         }
 
         /// <summary>

@@ -26,7 +26,10 @@ namespace BookManager.DataAccessLayer
         /// <param name="optionsBuilder">Построитель опций для настройки подключения</param>
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=GLAUZI\SQLEXPRESS;Database=BookManagerDB;Trusted_Connection=true;");
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer(@"Server=GLAUZI\SQLEXPRESS;Database=BookManagerDB;Trusted_Connection=true;TrustServerCertificate=true;");
+            }
         }
     }
 }

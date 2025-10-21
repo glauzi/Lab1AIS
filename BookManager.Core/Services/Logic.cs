@@ -21,8 +21,8 @@ namespace BookManager.Core.Services
         /// </summary>
         public Logic()
         {
-            _repository = new EntityBookRepository();
-            //_repository = new DapperBookRepository();
+            //_repository = new EntityBookRepository();
+            _repository = new DapperBookRepository();
         }
 
         /// <summary>
