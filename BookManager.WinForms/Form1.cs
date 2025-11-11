@@ -1,30 +1,43 @@
-using BookManager.Core.Services;
+п»їusing BookManager.Core.Services;
 using BookManager.Entities;
 using System;
 using System.Collections.Generic;
+using BookManager.DataAccessLayer;
 namespace BookManager.WinForms
 {
     /// <summary>
-    /// Главная форма приложения для управления книгами
-    /// Предоставляет графический интерфейс для выполнения CRUD операций и бизнес-функций
+    /// Р“Р»Р°РІРЅР°СЏ С„РѕСЂРјР° РїСЂРёР»РѕР¶РµРЅРёСЏ РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РєРЅРёРіР°РјРё
+    /// РџСЂРµРґРѕСЃС‚Р°РІР»СЏРµС‚ РіСЂР°С„РёС‡РµСЃРєРёР№ РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ CRUD РѕРїРµСЂР°С†РёР№ Рё Р±РёР·РЅРµСЃ-С„СѓРЅРєС†РёР№
     /// </summary>
     public partial class Form1 : Form
     {
-        private Logic _logic = new Logic();
+        private Logic _logic;
 
         /// <summary>
-        /// Конструктор формы. Инициализирует компоненты формы.
+        /// РРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚ РіР»Р°РІРЅСѓСЋ С„РѕСЂРјСѓ РїСЂРёР»РѕР¶РµРЅРёСЏ СЃ РІС‹Р±РѕСЂРѕРј С‚РµС…РЅРѕР»РѕРіРёРё РґРѕСЃС‚СѓРїР° Рє РґР°РЅРЅС‹Рј
         /// </summary>
         public Form1()
         {
+            var result = MessageBox.Show(
+                "РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Entity Framework?\n\n" +
+                "вЂў Р”Рђ - РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Entity Framework\n" +
+                "вЂў РќР•Рў - РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Dapper",
+                "Р’С‹Р±РѕСЂ С‚РµС…РЅРѕР»РѕРіРёРё РґРѕСЃС‚СѓРїР° Рє РґР°РЅРЅС‹Рј",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            _logic = result == DialogResult.Yes
+                ? new Logic(new EntityBookRepository())
+                : new Logic(new DapperBookRepository());
             InitializeComponent();
         }
         /// <summary>
-        /// Обработчик события загрузки формы. Вызывается после создания формы, но до ее отображения.
-        /// Выполняет инициализацию данных и пользовательского интерфейса.
+        /// РћР±СЂР°Р±РѕС‚С‡РёРє СЃРѕР±С‹С‚РёСЏ Р·Р°РіСЂСѓР·РєРё С„РѕСЂРјС‹. Р’С‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ СЃРѕР·РґР°РЅРёСЏ С„РѕСЂРјС‹, РЅРѕ РґРѕ РµРµ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ.
+        /// Р’С‹РїРѕР»РЅСЏРµС‚ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЋ РґР°РЅРЅС‹С… Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРіРѕ РёРЅС‚РµСЂС„РµР№СЃР°.
         /// </summary>
-        /// <param name="sender">Объект, который вызвал событие (в данном случае - форма)</param>
-        /// <param name="e">Аргументы события, содержащие дополнительную информацию</param>
+        /// <param name="sender">РћР±СЉРµРєС‚, РєРѕС‚РѕСЂС‹Р№ РІС‹Р·РІР°Р» СЃРѕР±С‹С‚РёРµ (РІ РґР°РЅРЅРѕРј СЃР»СѓС‡Р°Рµ - С„РѕСЂРјР°)</param>
+        /// <param name="e">РђСЂРіСѓРјРµРЅС‚С‹ СЃРѕР±С‹С‚РёСЏ, СЃРѕРґРµСЂР¶Р°С‰РёРµ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ</param>
         private void Form1_Load(object sender, EventArgs e)
         {
             if (_logic.GetAllBooks().Count == 0)
@@ -32,29 +45,29 @@ namespace BookManager.WinForms
             LoadBooksToGrid();
         }
         /// <summary>
-        /// Добавляет тестовые данные в коллекцию книг для демонстрации работы приложения
+        /// Р”РѕР±Р°РІР»СЏРµС‚ С‚РµСЃС‚РѕРІС‹Рµ РґР°РЅРЅС‹Рµ РІ РєРѕР»Р»РµРєС†РёСЋ РєРЅРёРі РґР»СЏ РґРµРјРѕРЅСЃС‚СЂР°С†РёРё СЂР°Р±РѕС‚С‹ РїСЂРёР»РѕР¶РµРЅРёСЏ
         /// </summary>
         private void AddSampleData()
         {
-            _logic.CreateBook(new Book(0, "Война и мир", "Лев Толстой", "Роман", 1869));
-            _logic.CreateBook(new Book(0, "Преступление и наказание", "Федор Достоевский", "Роман", 1866));
-            _logic.CreateBook(new Book(0, "Мастер и Маргарита", "Михаил Булгаков", "Фантастика", 1967));
-            _logic.CreateBook(new Book(0, "1984", "Джордж Оруэлл", "Антиутопия", 1949));
-            _logic.CreateBook(new Book(0, "Гарри Поттер", "Джоан Роулинг", "Фэнтези", 1997));
+            _logic.CreateBook(new Book(0, "Р’РѕР№РЅР° Рё РјРёСЂ", "Р›РµРІ РўРѕР»СЃС‚РѕР№", "Р РѕРјР°РЅ", 1869));
+            _logic.CreateBook(new Book(0, "РџСЂРµСЃС‚СѓРїР»РµРЅРёРµ Рё РЅР°РєР°Р·Р°РЅРёРµ", "Р¤РµРґРѕСЂ Р”РѕСЃС‚РѕРµРІСЃРєРёР№", "Р РѕРјР°РЅ", 1866));
+            _logic.CreateBook(new Book(0, "РњР°СЃС‚РµСЂ Рё РњР°СЂРіР°СЂРёС‚Р°", "РњРёС…Р°РёР» Р‘СѓР»РіР°РєРѕРІ", "Р¤Р°РЅС‚Р°СЃС‚РёРєР°", 1967));
+            _logic.CreateBook(new Book(0, "1984", "Р”Р¶РѕСЂРґР¶ РћСЂСѓСЌР»Р»", "РђРЅС‚РёСѓС‚РѕРїРёСЏ", 1949));
+            _logic.CreateBook(new Book(0, "Р“Р°СЂСЂРё РџРѕС‚С‚РµСЂ", "Р”Р¶РѕР°РЅ Р РѕСѓР»РёРЅРі", "Р¤СЌРЅС‚РµР·Рё", 1997));
         }
         /// <summary>
-        /// Загружает список всех книг из бизнес-логики и отображает их в DataGridView
+        /// Р—Р°РіСЂСѓР¶Р°РµС‚ СЃРїРёСЃРѕРє РІСЃРµС… РєРЅРёРі РёР· Р±РёР·РЅРµСЃ-Р»РѕРіРёРєРё Рё РѕС‚РѕР±СЂР°Р¶Р°РµС‚ РёС… РІ DataGridView
         /// </summary>
         private void LoadBooksToGrid()
         {
             dataGridViewBooks.DataSource = _logic.GetAllBooks();
         }
         /// <summary>
-        /// Обработчик события изменения выбранной строки в таблице книг.
-        /// Заполняет поля ввода данными выбранной книги для редактирования.
+        /// РћР±СЂР°Р±РѕС‚С‡РёРє СЃРѕР±С‹С‚РёСЏ РёР·РјРµРЅРµРЅРёСЏ РІС‹Р±СЂР°РЅРЅРѕР№ СЃС‚СЂРѕРєРё РІ С‚Р°Р±Р»РёС†Рµ РєРЅРёРі.
+        /// Р—Р°РїРѕР»РЅСЏРµС‚ РїРѕР»СЏ РІРІРѕРґР° РґР°РЅРЅС‹РјРё РІС‹Р±СЂР°РЅРЅРѕР№ РєРЅРёРіРё РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ.
         /// </summary>
-        /// <param name="sender">Таблица DataGridView</param>
-        /// <param name="e">Аргументы события</param>
+        /// <param name="sender">РўР°Р±Р»РёС†Р° DataGridView</param>
+        /// <param name="e">РђСЂРіСѓРјРµРЅС‚С‹ СЃРѕР±С‹С‚РёСЏ</param>
         private void dataGridViewBooks_SelectionChanged(object sender, EventArgs e)
         {
             if (dataGridViewBooks.SelectedRows.Count > 0)
@@ -70,10 +83,10 @@ namespace BookManager.WinForms
             }
         }
         /// <summary>
-        /// Обработчик нажатия кнопки "Добавить". Создает новую книгу на основе введенных данных.
+        /// РћР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРєРё "Р”РѕР±Р°РІРёС‚СЊ". РЎРѕР·РґР°РµС‚ РЅРѕРІСѓСЋ РєРЅРёРіСѓ РЅР° РѕСЃРЅРѕРІРµ РІРІРµРґРµРЅРЅС‹С… РґР°РЅРЅС‹С….
         /// </summary>
-        /// <param name="sender">Кнопка "Добавить"</param>
-        /// <param name="e">Аргументы события нажатия кнопки</param>
+        /// <param name="sender">РљРЅРѕРїРєР° "Р”РѕР±Р°РІРёС‚СЊ"</param>
+        /// <param name="e">РђСЂРіСѓРјРµРЅС‚С‹ СЃРѕР±С‹С‚РёСЏ РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРєРё</param>
         private void buttonAdd_Click(object sender, EventArgs e)
         {
             try
@@ -84,28 +97,28 @@ namespace BookManager.WinForms
                     _logic.CreateBook(newBook);
                     LoadBooksToGrid();
                     ClearInputFields();
-                    MessageBox.Show("Книга добавлена!");
+                    MessageBox.Show("РљРЅРёРіР° РґРѕР±Р°РІР»РµРЅР°!");
                 }
                 else
                 {
-                    MessageBox.Show("Год должен быть числом от 0 до 2025!");
+                    MessageBox.Show("Р“РѕРґ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С‡РёСЃР»РѕРј РѕС‚ 0 РґРѕ 2025!");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка: {ex.Message}");
+                MessageBox.Show($"РћС€РёР±РєР°: {ex.Message}");
             }
         }
         /// <summary>
-        /// Обработчик нажатия кнопки "Обновить".
+        /// РћР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРєРё "РћР±РЅРѕРІРёС‚СЊ".
         /// </summary>
-        /// <param name="sender">Кнопка "Обновить"</param>
-        /// <param name="e">Аргументы события нажатия кнопки</param>
+        /// <param name="sender">РљРЅРѕРїРєР° "РћР±РЅРѕРІРёС‚СЊ"</param>
+        /// <param name="e">РђСЂРіСѓРјРµРЅС‚С‹ СЃРѕР±С‹С‚РёСЏ РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРєРё</param>
         private void buttonUpdate_Click(object sender, EventArgs e)
         {
             if (dataGridViewBooks.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Выберите книгу для редактирования!");
+                MessageBox.Show("Р’С‹Р±РµСЂРёС‚Рµ РєРЅРёРіСѓ РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ!");
                 return;
             }
 
@@ -117,24 +130,24 @@ namespace BookManager.WinForms
                     var updatedBook = new Book(selectedBook.Id, textBoxTitle.Text, textBoxAuthor.Text, textBoxGenre.Text, year);
                     _logic.UpdateBook(updatedBook);
                     LoadBooksToGrid();
-                    MessageBox.Show("Книга обновлена!");
+                    MessageBox.Show("РљРЅРёРіР° РѕР±РЅРѕРІР»РµРЅР°!");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при обновлении: {ex.Message}");
+                MessageBox.Show($"РћС€РёР±РєР° РїСЂРё РѕР±РЅРѕРІР»РµРЅРёРё: {ex.Message}");
             }
         }
         /// <summary>
-        /// Обработчик нажатия кнопки "Удалить".
+        /// РћР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРєРё "РЈРґР°Р»РёС‚СЊ".
         /// </summary>
-        /// <param name="sender">Кнопка "Удалить".</param>
-        /// <param name="e">Аргументы события нажатия кнопки</param>
+        /// <param name="sender">РљРЅРѕРїРєР° "РЈРґР°Р»РёС‚СЊ".</param>
+        /// <param name="e">РђСЂРіСѓРјРµРЅС‚С‹ СЃРѕР±С‹С‚РёСЏ РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРєРё</param>
         private void buttonDelete_Click(object sender, EventArgs e)
         {
             if (dataGridViewBooks.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Выберите книгу для удаления!");
+                MessageBox.Show("Р’С‹Р±РµСЂРёС‚Рµ РєРЅРёРіСѓ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ!");
                 return;
             }
 
@@ -143,26 +156,26 @@ namespace BookManager.WinForms
                 var selectedBook = dataGridViewBooks.SelectedRows[0].DataBoundItem as Book;
                 if (selectedBook != null)
                 {
-                    var result = MessageBox.Show($"Удалить книгу: {selectedBook.Title}?", "Подтверждение", MessageBoxButtons.YesNo);
+                    var result = MessageBox.Show($"РЈРґР°Р»РёС‚СЊ РєРЅРёРіСѓ: {selectedBook.Title}?", "РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ", MessageBoxButtons.YesNo);
                     if (result == DialogResult.Yes)
                     {
                         _logic.DeleteBookById(selectedBook.Id);
                         LoadBooksToGrid();
                         ClearInputFields();
-                        MessageBox.Show("Книга удалена!");
+                        MessageBox.Show("РљРЅРёРіР° СѓРґР°Р»РµРЅР°!");
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при удалении: {ex.Message}");
+                MessageBox.Show($"РћС€РёР±РєР° РїСЂРё СѓРґР°Р»РµРЅРёРё: {ex.Message}");
             }
         }
         /// <summary>
-        /// Обработчик нажатия кнопки "Группировать по жанрам".
+        /// РћР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРєРё "Р“СЂСѓРїРїРёСЂРѕРІР°С‚СЊ РїРѕ Р¶Р°РЅСЂР°Рј".
         /// </summary>
-        /// <param name="sender">Кнопка "Группировать по жанрам".</param>
-        /// <param name="e">Аргументы события нажатия кнопки</param>
+        /// <param name="sender">РљРЅРѕРїРєР° "Р“СЂСѓРїРїРёСЂРѕРІР°С‚СЊ РїРѕ Р¶Р°РЅСЂР°Рј".</param>
+        /// <param name="e">РђСЂРіСѓРјРµРЅС‚С‹ СЃРѕР±С‹С‚РёСЏ РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРєРё</param>
         private void buttonGroupByGenre_Click(object sender, EventArgs e)
         {
             try
@@ -180,14 +193,14 @@ namespace BookManager.WinForms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка: {ex.Message}");
+                MessageBox.Show($"РћС€РёР±РєР°: {ex.Message}");
             }
         }
         /// <summary>
-        /// Обработчик нажатия кнопки "Найти книги новее".
+        /// РћР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРєРё "РќР°Р№С‚Рё РєРЅРёРіРё РЅРѕРІРµРµ".
         /// </summary>
-        /// <param name="sender">Кнопка "Найти книги новее".</param>
-        /// <param name="e">Аргументы события нажатия кнопки</param>
+        /// <param name="sender">РљРЅРѕРїРєР° "РќР°Р№С‚Рё РєРЅРёРіРё РЅРѕРІРµРµ".</param>
+        /// <param name="e">РђСЂРіСѓРјРµРЅС‚С‹ СЃРѕР±С‹С‚РёСЏ РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРєРё</param>
         private void buttonFindByYear_Click(object sender, EventArgs e)
         {
             if (int.TryParse(textBoxYearFilter.Text, out int year))
@@ -199,27 +212,27 @@ namespace BookManager.WinForms
 
                     if (books.Count > 0)
                     {
-                        listBoxYearResults.Items.Add($"Книги после {year} года:");
+                        listBoxYearResults.Items.Add($"РљРЅРёРіРё РїРѕСЃР»Рµ {year} РіРѕРґР°:");
                         foreach (var book in books)
                             listBoxYearResults.Items.Add(book.ToString());
                     }
                     else
                     {
-                        listBoxYearResults.Items.Add("Книги не найдены");
+                        listBoxYearResults.Items.Add("РљРЅРёРіРё РЅРµ РЅР°Р№РґРµРЅС‹");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка: {ex.Message}");
+                    MessageBox.Show($"РћС€РёР±РєР°: {ex.Message}");
                 }
             }
             else
             {
-                MessageBox.Show("Введите корректный год!");
+                MessageBox.Show("Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ РіРѕРґ!");
             }
         }
         /// <summary>
-        /// Очистка полей
+        /// РћС‡РёСЃС‚РєР° РїРѕР»РµР№
         /// </summary>
         private void ClearInputFields()
         {

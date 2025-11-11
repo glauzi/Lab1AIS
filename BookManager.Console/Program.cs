@@ -5,16 +5,31 @@
     using BookManager.Core.Services;
     using System;
     using System.Text.RegularExpressions;
+    using BookManager.DataAccessLayer;
 
     /// <summary>
     /// Предоставляет консольный интерфейс для выполнения CRUD операций и бизнес-функций
     /// </summary>
     internal class Program
     {
-        private static Logic _logic = new Logic();
+        private static Logic _logic;
+        /// <summary>
+        /// Главная точка входа для консольного приложения
+        /// Предоставляет пользователю выбор технологии ORM для работы с данными
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
+            Console.WriteLine("=== ВЫБОР ТЕХНОЛОГИИ ДОСТУПА К ДАННЫМ ===");
+            Console.WriteLine("1 - Entity Framework");
+            Console.WriteLine("2 - Dapper");
+            Console.Write("Ваш выбор (1 или 2): ");
 
+            var choiceorm = Console.ReadLine();
+
+            _logic = choiceorm == "2"
+                ? new Logic(new DapperBookRepository())
+                : new Logic(new EntityBookRepository());
             bool exitRequested = false;
 
             while (!exitRequested)

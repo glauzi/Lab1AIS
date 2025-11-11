@@ -17,12 +17,12 @@ namespace BookManager.Core.Services
         private readonly IBookRepository _repository;
 
         /// <summary>
-        /// Инициализирует бизнес-логику с выбранной реализацией репозитория
+        /// Инициализирует новый экземпляр бизнес-логики с внедренной зависимостью репозитория
         /// </summary>
-        public Logic()
+        /// <param name="repository">Реализация интерфейса IBookRepository для работы с данными</param>
+        public Logic(IBookRepository repository)
         {
-            _repository = new EntityBookRepository();
-            // _repository = new DapperBookRepository();
+            _repository = repository;
         }
 
         /// <summary>
