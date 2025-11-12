@@ -11,28 +11,20 @@ namespace BookManager.DataAccessLayer
     /// <summary>
     /// Реализация репозитория книг с использованием Entity Framework Core
     /// Обеспечивает объектно-ориентированную работу с базой данных
+    /// Использует фабрику контекстов для изоляции операций и предотвращения конфликтов отслеживания
     /// </summary>
     public class EntityBookRepository : IBookRepository
     {
-        private readonly BookContext _context;
+        private readonly Func<BookContext> _contextFactory;
 
         /// <summary>
-        /// Конструктор по умолчанию для обратной совместимости
-        /// Создает новый контекст БД (временное решение)
+        /// Основной конструктор с внедрением фабрики контекстов
+        /// Решает проблему отслеживания сущностей в WinForms
         /// </summary>
-        public EntityBookRepository() : this(new BookContext())
+        /// <param name="contextFactory">Фабрика для создания экземпляров контекста БД</param>
+        public EntityBookRepository(Func<BookContext> contextFactory)
         {
-        }
-
-        /// <summary>
-        /// Основной конструктор с внедрением зависимости контекста
-        /// Реализует SRP - репозиторий только использует контекст, не создает его
-        /// Позволяет тестировать с mock-контекстами
-        /// </summary>
-        /// <param name="context">Готовый контекст базы данных</param>
-        public EntityBookRepository(BookContext context)
-        {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
         /// <summary>
@@ -41,8 +33,11 @@ namespace BookManager.DataAccessLayer
         /// <param name="book">Книга для добавления</param>
         public void Add(Book book)
         {
-            _context.Books.Add(book);
-            _context.SaveChanges();
+            using (var context = _contextFactory())
+            {
+                context.Books.Add(book);
+                context.SaveChanges();
+            }
         }
 
         /// <summary>
@@ -51,11 +46,14 @@ namespace BookManager.DataAccessLayer
         /// <param name="id">Идентификатор книги для удаления</param>
         public void Delete(int id)
         {
-            var book = _context.Books.Find(id);
-            if (book != null)
+            using (var context = _contextFactory())
             {
-                _context.Books.Remove(book);
-                _context.SaveChanges();
+                var book = context.Books.Find(id);
+                if (book != null)
+                {
+                    context.Books.Remove(book);
+                    context.SaveChanges();
+                }
             }
         }
 
@@ -65,7 +63,10 @@ namespace BookManager.DataAccessLayer
         /// <returns>Список всех книг</returns>
         public List<Book> GetAll()
         {
-            return _context.Books.ToList();
+            using (var context = _contextFactory())
+            {
+                return context.Books.ToList();
+            }
         }
 
         /// <summary>
@@ -75,7 +76,10 @@ namespace BookManager.DataAccessLayer
         /// <returns>Найденная книга или null если не найдена</returns>
         public Book GetById(int id)
         {
-            return _context.Books.Find(id);
+            using (var context = _contextFactory())
+            {
+                return context.Books.Find(id);
+            }
         }
 
         /// <summary>
@@ -84,8 +88,15 @@ namespace BookManager.DataAccessLayer
         /// <param name="book">Книга с обновленными данными</param>
         public void Update(Book book)
         {
-            _context.Entry(book).State = EntityState.Modified;
-            _context.SaveChanges();
+            using (var context = _contextFactory())
+            {
+                var existingBook = context.Books.Find(book.Id);
+                if (existingBook != null)
+                {
+                    context.Entry(existingBook).CurrentValues.SetValues(book);
+                    context.SaveChanges();
+                }
+            }
         }
     }
 }

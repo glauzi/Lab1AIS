@@ -9,6 +9,11 @@ using BookManager.Core.Services;
 
 namespace BookManager.Core
 {
+    /// <summary>
+    /// Модуль конфигурации Ninject для Dependency Injection
+    /// Реализует принцип Dependency Inversion (DIP) - зависимости определяются через абстракции
+    /// Обеспечивает централизованное управление зависимостями в соответствии с SOLID
+    /// </summary>
     public class SimpleConfigModule : NinjectModule
     {
         private readonly bool _useEntityFramework;
@@ -24,10 +29,12 @@ namespace BookManager.Core
         {
             _useEntityFramework = useEntityFramework;
         }
-
+        /// <summary>
+        /// Настраивает привязки зависимостей для DI контейнера
+        /// </summary>
         public override void Load()
         {
-            // Динамически выбираем реализацию
+            Bind<Func<BookContext>>().ToMethod(ctx => () => new BookContext());
             if (_useEntityFramework)
             {
                 Bind<IBookRepository>().To<EntityBookRepository>().InSingletonScope();

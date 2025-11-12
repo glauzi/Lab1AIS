@@ -2,7 +2,9 @@
 using BookManager.Entities;
 using System;
 using System.Collections.Generic;
+using Ninject;
 using BookManager.DataAccessLayer;
+using BookManager.Core;
 namespace BookManager.WinForms
 {
     /// <summary>
@@ -27,9 +29,12 @@ namespace BookManager.WinForms
                 MessageBoxIcon.Question
             );
 
-            _logic = result == DialogResult.Yes
-                ? new Logic(new EntityBookRepository())
-                : new Logic(new DapperBookRepository());
+            // СОЗДАЕМ DI КОНТЕЙНЕР С ВЫБРАННОЙ КОНФИГУРАЦИЕЙ
+            bool useEntityFramework = result == DialogResult.Yes;
+            IKernel ninjectKernel = new StandardKernel(new SimpleConfigModule(useEntityFramework));
+
+            // ПОЛУЧАЕМ LOGIC ЧЕРЕЗ DI КОНТЕЙНЕР
+            _logic = ninjectKernel.Get<Logic>();
             InitializeComponent();
         }
         /// <summary>
