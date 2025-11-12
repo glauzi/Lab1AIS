@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BookManager.Core
+namespace BookManager.DataAccessLayer
 {
     public static class AppConfig
     {

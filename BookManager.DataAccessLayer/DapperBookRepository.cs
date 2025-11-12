@@ -19,7 +19,7 @@ namespace BookManager.DataAccessLayer
         /// Использует стандартную строку подключения (временное решение)
         /// </summary>
         public DapperBookRepository()
-            : this(@"Server=GLAUZI\SQLEXPRESS;Database=BookManagerDB;Trusted_Connection=true;TrustServerCertificate=true;")
+            : this(AppConfig.ConnectionString)
         {
         }
 
