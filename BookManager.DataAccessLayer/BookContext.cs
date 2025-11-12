@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BookManager.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 
 namespace BookManager.DataAccessLayer
 {
@@ -12,7 +13,7 @@ namespace BookManager.DataAccessLayer
     /// Контекст базы данных для работы с книгами через Entity Framework
     /// Представляет сессию с базой данных и позволяет работать с сущностями
     /// </summary>
-    internal class BookContext : DbContext
+    public class BookContext : DbContext
     {
         /// <summary>
         /// Набор данных для работы с книгами в базе данных
@@ -28,7 +29,7 @@ namespace BookManager.DataAccessLayer
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(@"Server=GLAUZI\SQLEXPRESS;Database=BookManagerDB;Trusted_Connection=true;TrustServerCertificate=true;");
+                optionsBuilder.UseSqlServer(AppConfig.ConnectionString);
             }
         }
     }

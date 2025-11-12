@@ -17,12 +17,22 @@ namespace BookManager.DataAccessLayer
         private readonly BookContext _context;
 
         /// <summary>
-        /// Инициализирует новый экземпляр репозитория Entity Framework
-        /// Создает новый контекст базы данных
+        /// Конструктор по умолчанию для обратной совместимости
+        /// Создает новый контекст БД (временное решение)
         /// </summary>
-        public EntityBookRepository()
+        public EntityBookRepository() : this(new BookContext())
         {
-            _context = new BookContext();
+        }
+
+        /// <summary>
+        /// Основной конструктор с внедрением зависимости контекста
+        /// Реализует SRP - репозиторий только использует контекст, не создает его
+        /// Позволяет тестировать с mock-контекстами
+        /// </summary>
+        /// <param name="context">Готовый контекст базы данных</param>
+        public EntityBookRepository(BookContext context)
+        {
+            _context = context;
         }
 
         /// <summary>

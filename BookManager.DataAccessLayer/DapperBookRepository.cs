@@ -15,12 +15,23 @@ namespace BookManager.DataAccessLayer
         private readonly string _connectionString;
 
         /// <summary>
-        /// Инициализирует новый экземпляр репозитория Dapper
-        /// Устанавливает строку подключения к базе данных
+        /// Конструктор по умолчанию для обратной совместимости
+        /// Использует стандартную строку подключения (временное решение)
         /// </summary>
         public DapperBookRepository()
+            : this(@"Server=GLAUZI\SQLEXPRESS;Database=BookManagerDB;Trusted_Connection=true;TrustServerCertificate=true;")
         {
-            _connectionString = @"Server=GLAUZI\SQLEXPRESS;Database=BookManagerDB;Trusted_Connection=true;TrustServerCertificate=true;";
+        }
+
+        /// <summary>
+        /// Основной конструктор с внедрением зависимости строки подключения
+        /// Реализует SRP - репозиторий только использует строку подключения, не определяет ее
+        /// Позволяет использовать разные базы данных и тестировать с mock-connection
+        /// </summary>
+        /// <param name="connectionString">Строка подключения к базе данных</param>
+        public DapperBookRepository(string connectionString)
+        {
+            _connectionString = connectionString;
         }
 
         /// <summary>
