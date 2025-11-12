@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Ninject" Version="3.3.6" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BookManager.Core\BookManager.Core.csproj" />
     <ProjectReference Include="..\BookManager.DataAccessLayer\BookManager.DataAccessLayer.csproj" />
     <ProjectReference Include="..\BookManager.Entities\BookManager.Entities.csproj" />

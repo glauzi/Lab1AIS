@@ -6,6 +6,7 @@
     using System;
     using System.Text.RegularExpressions;
     using BookManager.DataAccessLayer;
+    using Ninject;
 
     /// <summary>
     /// Предоставляет консольный интерфейс для выполнения CRUD операций и бизнес-функций
@@ -27,9 +28,13 @@
 
             var choiceorm = Console.ReadLine();
 
-            _logic = choiceorm == "2"
-                ? new Logic(new DapperBookRepository())
-                : new Logic(new EntityBookRepository());
+            // СОЗДАЕМ DI КОНТЕЙНЕР С ВЫБРАННОЙ КОНФИГУРАЦИЕЙ
+            bool useEntityFramework = choiceorm != "2"; // true для EF, false для Dapper
+            IKernel ninjectKernel = new StandardKernel(new SimpleConfigModule(useEntityFramework));
+
+            // ПОЛУЧАЕМ LOGIC ЧЕРЕЗ DI КОНТЕЙНЕР
+            _logic = ninjectKernel.Get<Logic>();
+
             bool exitRequested = false;
 
             while (!exitRequested)
@@ -199,14 +204,14 @@
                         if (year >= 0 && year <= 2025)
                         {
                             existingBook.Year = year;
-                            _logic.UpdateBook(existingBook);
-                            Console.WriteLine("Книга успешно обновлена!");
                         }
                         else
                         {
                             Console.WriteLine("Год должен быть правильным!");
                         }
                     }
+                    _logic.UpdateBook(existingBook);
+                    Console.WriteLine("Книга успешно обновлена!");
                 }
                 else
                 {
