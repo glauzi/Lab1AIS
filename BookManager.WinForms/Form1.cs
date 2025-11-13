@@ -13,7 +13,8 @@ namespace BookManager.WinForms
     /// </summary>
     public partial class Form1 : Form
     {
-        private Logic _logic;
+        private static CRUD _crudService;
+        private static BLBook _blService;
 
         /// <summary>
         /// Инициализирует главную форму приложения с выбором технологии доступа к данным
@@ -34,7 +35,8 @@ namespace BookManager.WinForms
             IKernel ninjectKernel = new StandardKernel(new SimpleConfigModule(useEntityFramework));
 
             // ПОЛУЧАЕМ LOGIC ЧЕРЕЗ DI КОНТЕЙНЕР
-            _logic = ninjectKernel.Get<Logic>();
+            _crudService = ninjectKernel.Get<CRUD>();
+            _blService = ninjectKernel.Get<BLBook>();
             InitializeComponent();
         }
         /// <summary>
@@ -45,27 +47,14 @@ namespace BookManager.WinForms
         /// <param name="e">Аргументы события, содержащие дополнительную информацию</param>
         private void Form1_Load(object sender, EventArgs e)
         {
-            if (_logic.GetAllBooks().Count == 0)
-                AddSampleData();
             LoadBooksToGrid();
-        }
-        /// <summary>
-        /// Добавляет тестовые данные в коллекцию книг для демонстрации работы приложения
-        /// </summary>
-        private void AddSampleData()
-        {
-            _logic.CreateBook(new Book(0, "Война и мир", "Лев Толстой", "Роман", 1869));
-            _logic.CreateBook(new Book(0, "Преступление и наказание", "Федор Достоевский", "Роман", 1866));
-            _logic.CreateBook(new Book(0, "Мастер и Маргарита", "Михаил Булгаков", "Фантастика", 1967));
-            _logic.CreateBook(new Book(0, "1984", "Джордж Оруэлл", "Антиутопия", 1949));
-            _logic.CreateBook(new Book(0, "Гарри Поттер", "Джоан Роулинг", "Фэнтези", 1997));
         }
         /// <summary>
         /// Загружает список всех книг из бизнес-логики и отображает их в DataGridView
         /// </summary>
         private void LoadBooksToGrid()
         {
-            dataGridViewBooks.DataSource = _logic.GetAllBooks();
+            dataGridViewBooks.DataSource = _crudService.GetAllBooks();
         }
         /// <summary>
         /// Обработчик события изменения выбранной строки в таблице книг.
@@ -99,7 +88,7 @@ namespace BookManager.WinForms
                 if (int.TryParse(textBoxYear.Text, out int year) && year >= 0 && year <= 2025)
                 {
                     var newBook = new Book(0, textBoxTitle.Text, textBoxAuthor.Text, textBoxGenre.Text, year);
-                    _logic.CreateBook(newBook);
+                    _crudService.CreateBook(newBook);
                     LoadBooksToGrid();
                     ClearInputFields();
                     MessageBox.Show("Книга добавлена!");
@@ -133,7 +122,7 @@ namespace BookManager.WinForms
                 if (selectedBook != null && int.TryParse(textBoxYear.Text, out int year))
                 {
                     var updatedBook = new Book(selectedBook.Id, textBoxTitle.Text, textBoxAuthor.Text, textBoxGenre.Text, year);
-                    _logic.UpdateBook(updatedBook);
+                    _crudService.UpdateBook(updatedBook);
                     LoadBooksToGrid();
                     MessageBox.Show("Книга обновлена!");
                 }
@@ -164,7 +153,7 @@ namespace BookManager.WinForms
                     var result = MessageBox.Show($"Удалить книгу: {selectedBook.Title}?", "Подтверждение", MessageBoxButtons.YesNo);
                     if (result == DialogResult.Yes)
                     {
-                        _logic.DeleteBookById(selectedBook.Id);
+                        _crudService.DeleteBookById(selectedBook.Id);
                         LoadBooksToGrid();
                         ClearInputFields();
                         MessageBox.Show("Книга удалена!");
@@ -185,7 +174,7 @@ namespace BookManager.WinForms
         {
             try
             {
-                var booksByGenre = _logic.GroupBooksByGenre();
+                var booksByGenre = _blService.GroupBooksByGenre();
                 listBoxGenres.Items.Clear();
 
                 foreach (var genreGroup in booksByGenre)
@@ -212,7 +201,7 @@ namespace BookManager.WinForms
             {
                 try
                 {
-                    var books = _logic.FindBooksPublishedAfterYear(year);
+                    var books = _blService.FindBooksPublishedAfterYear(year);
                     listBoxYearResults.Items.Clear();
 
                     if (books.Count > 0)
