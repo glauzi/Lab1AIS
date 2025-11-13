@@ -35,6 +35,7 @@ namespace BookManager.Core
         public override void Load()
         {
             Bind<Func<BookContext>>().ToMethod(ctx => () => new BookContext());
+            Bind<string>().ToConstant(AppConfig.ConnectionString);
             if (_useEntityFramework)
             {
                 Bind<IBookRepository>().To<EntityBookRepository>().InSingletonScope();

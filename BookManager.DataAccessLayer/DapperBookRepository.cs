@@ -15,15 +15,6 @@ namespace BookManager.DataAccessLayer
         private readonly string _connectionString;
 
         /// <summary>
-        /// Конструктор по умолчанию для обратной совместимости
-        /// Использует стандартную строку подключения (временное решение)
-        /// </summary>
-        public DapperBookRepository()
-            : this(AppConfig.ConnectionString)
-        {
-        }
-
-        /// <summary>
         /// Основной конструктор с внедрением зависимости строки подключения
         /// Реализует SRP - репозиторий только использует строку подключения, не определяет ее
         /// Позволяет использовать разные базы данных и тестировать с mock-connection
