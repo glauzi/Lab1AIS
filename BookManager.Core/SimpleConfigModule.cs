@@ -34,8 +34,8 @@ namespace BookManager.Core
         /// </summary>
         public override void Load()
         {
-            Bind<Func<BookContext>>().ToMethod(ctx => () => new BookContext());
             Bind<string>().ToConstant(AppConfig.ConnectionString);
+            Bind<Func<BookContext>>().ToMethod(ctx => () => new BookContext());
             if (_useEntityFramework)
             {
                 Bind<IBookRepository>().To<EntityBookRepository>().InSingletonScope();
@@ -44,9 +44,7 @@ namespace BookManager.Core
             {
                 Bind<IBookRepository>().To<DapperBookRepository>().InSingletonScope();
             }
-
-            Bind<CRUD>().ToSelf().InSingletonScope();
-            Bind<BLBook>().ToSelf().InSingletonScope();
+            Bind<IBookService>().To<BookService>().InSingletonScope();
         }
     }
 }

@@ -13,8 +13,6 @@
     /// </summary>
     internal class Program
     {
-        private static CRUD _crudService;
-        private static BLBook _blService;
         /// <summary>
         /// Главная точка входа для консольного приложения
         /// Предоставляет пользователю выбор технологии ORM для работы с данными
@@ -34,8 +32,7 @@
             IKernel ninjectKernel = new StandardKernel(new SimpleConfigModule(useEntityFramework));
 
             // ПОЛУЧАЕМ LOGIC ЧЕРЕЗ DI КОНТЕЙНЕР
-            var crudService = ninjectKernel.Get<CRUD>();
-            var blService = ninjectKernel.Get<BLBook>();
+            var bookService = ninjectKernel.Get<IBookService>();
 
             bool exitRequested = false;
 
@@ -49,22 +46,22 @@
                 switch (choice)
                 {
                     case "1":
-                        ShowAllBooks(crudService);
+                        ShowAllBooks(bookService);
                         break;
                     case "2":
-                        AddNewBook(crudService);
+                        AddNewBook(bookService);
                         break;
                     case "3":
-                        EditBook(crudService);
+                        EditBook(bookService);
                         break;
                     case "4":
-                        DeleteBook(crudService);
+                        DeleteBook(bookService);
                         break;
                     case "5":
-                        GroupByGenre(blService);
+                        GroupByGenre(bookService);
                         break;
                     case "6":
-                        FindBooksByYear(blService);
+                        FindBooksByYear(bookService);
                         break;
                     case "0":
                         exitRequested = true;
@@ -97,12 +94,12 @@
         /// <summary>
         /// Вывод всех книг
         /// </summary>
-        private static void ShowAllBooks(CRUD crudService)
+        private static void ShowAllBooks(IBookService bookService)
         {
             Console.Clear();
             Console.WriteLine("=== ВСЕ КНИГИ ===");
 
-            var books = crudService.GetAllBooks();
+            var books = bookService.GetAllBooks();
 
             if (books.Count == 0)
             {
@@ -121,7 +118,7 @@
         /// <summary>
         /// Добавление книги
         /// </summary>
-        private static void AddNewBook(CRUD crudService)
+        private static void AddNewBook(IBookService bookService)
         {
             Console.Clear();
             Console.WriteLine("=== ДОБАВЛЕНИЕ НОВОЙ КНИГИ ===");
@@ -145,7 +142,7 @@
                     if (year >= 0 && year <= 2025)
                     {
                         var newBook = new Book(0, title, author, genre, year);
-                        crudService.CreateBook(newBook);
+                        bookService.CreateBook(newBook);
                         Console.WriteLine("Книга успешно добавлена!");
                     }
                     else
@@ -168,17 +165,17 @@
         /// <summary>
         /// Редактирование книги
         /// </summary>
-        private static void EditBook(CRUD crudService)
+        private static void EditBook(IBookService bookService)
         {
             Console.Clear();
             Console.WriteLine("=== РЕДАКТИРОВАНИЕ КНИГИ ===");
 
-            ShowAllBooks(crudService);
+            ShowAllBooks(bookService);
             Console.Write("\nВведите ID книги для редактирования: ");
 
             if (int.TryParse(Console.ReadLine(), out int id))
             {
-                var existingBook = crudService.GetBookById(id);
+                var existingBook = bookService.GetBookById(id);
 
                 if (existingBook != null)
                 {
@@ -212,7 +209,7 @@
                             Console.WriteLine("Год должен быть правильным!");
                         }
                     }
-                    crudService.UpdateBook(existingBook);
+                    bookService.UpdateBook(existingBook);
                     Console.WriteLine("Книга успешно обновлена!");
                 }
                 else
@@ -230,17 +227,17 @@
         /// <summary>
         /// Удаление книги
         /// </summary>
-        private static void DeleteBook(CRUD crudService)
+        private static void DeleteBook(IBookService bookService)
         {
             Console.Clear();
             Console.WriteLine("=== УДАЛЕНИЕ КНИГИ ===");
 
-            ShowAllBooks(crudService);
+            ShowAllBooks(bookService);
             Console.Write("\nВведите ID книги для удаления: ");
 
             if (int.TryParse(Console.ReadLine(), out int id))
             {
-                var existingBook = crudService.GetBookById(id);
+                var existingBook = bookService.GetBookById(id);
 
                 if (existingBook != null)
                 {
@@ -249,7 +246,7 @@
 
                     if (confirmation?.ToUpper() == "ДА")
                     {
-                        crudService.DeleteBookById(id);
+                        bookService.DeleteBookById(id);
                         Console.WriteLine("Книга успешно удалена!");
                     }
                     else
@@ -272,12 +269,12 @@
         /// <summary>
         /// Группировка книг по жанрам
         /// </summary>
-        private static void GroupByGenre(BLBook blService)
+        private static void GroupByGenre(IBookService bookService)
         {
             Console.Clear();
             Console.WriteLine("=== ГРУППИРОВКА ПО ЖАНРАМ ===");
 
-            var booksByGenre = blService.GroupBooksByGenre();
+            var booksByGenre = bookService.GroupBooksByGenre();
 
             if (booksByGenre.Count == 0)
             {
@@ -300,7 +297,7 @@
         /// <summary>
         /// Поиск книг по году
         /// </summary>
-        private static void FindBooksByYear(BLBook blService)
+        private static void FindBooksByYear(IBookService bookService)
         {
             Console.Clear();
             Console.WriteLine("=== ПОИСК КНИГ ПО ГОДУ ===");
@@ -309,7 +306,7 @@
 
             if (int.TryParse(Console.ReadLine(), out int year))
             {
-                var books = blService.FindBooksPublishedAfterYear(year);
+                var books = bookService.FindBooksPublishedAfterYear(year);
 
                 if (books.Count == 0)
                 {

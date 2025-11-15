@@ -13,14 +13,14 @@ namespace BookManager.WinForms
     /// </summary>
     public partial class Form1 : Form
     {
-        private static CRUD _crudService;
-        private static BLBook _blService;
-
+        private readonly IBookService _bookService;
         /// <summary>
         /// Инициализирует главную форму приложения с выбором технологии доступа к данным
         /// </summary>
         public Form1()
         {
+            InitializeComponent();
+
             var result = MessageBox.Show(
                 "Использовать Entity Framework?\n\n" +
                 "• ДА - использовать Entity Framework\n" +
@@ -35,9 +35,7 @@ namespace BookManager.WinForms
             IKernel ninjectKernel = new StandardKernel(new SimpleConfigModule(useEntityFramework));
 
             // ПОЛУЧАЕМ LOGIC ЧЕРЕЗ DI КОНТЕЙНЕР
-            _crudService = ninjectKernel.Get<CRUD>();
-            _blService = ninjectKernel.Get<BLBook>();
-            InitializeComponent();
+            _bookService = ninjectKernel.Get<IBookService>();
         }
         /// <summary>
         /// Обработчик события загрузки формы. Вызывается после создания формы, но до ее отображения.
@@ -54,7 +52,7 @@ namespace BookManager.WinForms
         /// </summary>
         private void LoadBooksToGrid()
         {
-            dataGridViewBooks.DataSource = _crudService.GetAllBooks();
+            dataGridViewBooks.DataSource = _bookService.GetAllBooks();
         }
         /// <summary>
         /// Обработчик события изменения выбранной строки в таблице книг.
@@ -88,7 +86,7 @@ namespace BookManager.WinForms
                 if (int.TryParse(textBoxYear.Text, out int year) && year >= 0 && year <= 2025)
                 {
                     var newBook = new Book(0, textBoxTitle.Text, textBoxAuthor.Text, textBoxGenre.Text, year);
-                    _crudService.CreateBook(newBook);
+                    _bookService.CreateBook(newBook);
                     LoadBooksToGrid();
                     ClearInputFields();
                     MessageBox.Show("Книга добавлена!");
@@ -122,7 +120,7 @@ namespace BookManager.WinForms
                 if (selectedBook != null && int.TryParse(textBoxYear.Text, out int year))
                 {
                     var updatedBook = new Book(selectedBook.Id, textBoxTitle.Text, textBoxAuthor.Text, textBoxGenre.Text, year);
-                    _crudService.UpdateBook(updatedBook);
+                    _bookService.UpdateBook(updatedBook);
                     LoadBooksToGrid();
                     MessageBox.Show("Книга обновлена!");
                 }
@@ -153,7 +151,7 @@ namespace BookManager.WinForms
                     var result = MessageBox.Show($"Удалить книгу: {selectedBook.Title}?", "Подтверждение", MessageBoxButtons.YesNo);
                     if (result == DialogResult.Yes)
                     {
-                        _crudService.DeleteBookById(selectedBook.Id);
+                        _bookService.DeleteBookById(selectedBook.Id);
                         LoadBooksToGrid();
                         ClearInputFields();
                         MessageBox.Show("Книга удалена!");
@@ -174,7 +172,7 @@ namespace BookManager.WinForms
         {
             try
             {
-                var booksByGenre = _blService.GroupBooksByGenre();
+                var booksByGenre = _bookService.GroupBooksByGenre();
                 listBoxGenres.Items.Clear();
 
                 foreach (var genreGroup in booksByGenre)
@@ -201,7 +199,7 @@ namespace BookManager.WinForms
             {
                 try
                 {
-                    var books = _blService.FindBooksPublishedAfterYear(year);
+                    var books = _bookService.FindBooksPublishedAfterYear(year);
                     listBoxYearResults.Items.Clear();
 
                     if (books.Count > 0)
