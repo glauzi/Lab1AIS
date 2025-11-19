@@ -18,7 +18,6 @@ namespace BookManager.Core.Services
 
         public BookService(IBookRepository repository)
         {
-            // Оба внутренних сервиса получают один и тот же репозиторий
             _managementService = new CRUD(repository);
             _businessLogicService = new BLBook(repository);
         }
