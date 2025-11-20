@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookManager.Entities", "Boo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookManager.DataAccessLayer", "BookManager.DataAccessLayer\BookManager.DataAccessLayer.csproj", "{7F76F06A-7210-40E4-9A7A-B937461DBD29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookManager.Shared", "BookManager.Shared\BookManager.Shared.csproj", "{75680A8B-2167-4302-96F2-822ECB989FE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookManager.Shared", "BookManager.Shared\BookManager.Shared.csproj", "{75680A8B-2167-4302-96F2-822ECB989FE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookManager.Presenter", "BookManager.Presenter\BookManager.Presenter.csproj", "{32D36F00-1592-4A86-A6D1-6339CE25C235}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{75680A8B-2167-4302-96F2-822ECB989FE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75680A8B-2167-4302-96F2-822ECB989FE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75680A8B-2167-4302-96F2-822ECB989FE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32D36F00-1592-4A86-A6D1-6339CE25C235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32D36F00-1592-4A86-A6D1-6339CE25C235}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32D36F00-1592-4A86-A6D1-6339CE25C235}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32D36F00-1592-4A86-A6D1-6339CE25C235}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

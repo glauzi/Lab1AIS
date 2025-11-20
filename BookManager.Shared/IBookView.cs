@@ -13,7 +13,6 @@ namespace BookManager.Shared
     /// </summary>
     public interface IBookView
     {
-        // ==== События, которые генерирует View ====
 
         /// <summary>
         /// Событие, возникающее при загрузке представления (например, при загрузке формы).
@@ -52,8 +51,6 @@ namespace BookManager.Shared
         event EventHandler SelectedBookChanged;
 
 
-        // ==== Входные данные / состояние View, к которым обращается Presenter ====
-
         /// <summary>
         /// Название книги, введённое пользователем.
         /// </summary>
@@ -84,9 +81,6 @@ namespace BookManager.Shared
         /// Может быть null, если ничего не выбрано.
         /// </summary>
         Book? SelectedBook { get; }
-
-
-        // ==== Методы, с помощью которых Presenter управляет отображением ====
 
         /// <summary>
         /// Показать (перерисовать) полный список книг в основной таблице.

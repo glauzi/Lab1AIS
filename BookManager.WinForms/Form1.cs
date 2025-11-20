@@ -7,53 +7,107 @@ using BookManager.Shared;
 namespace BookManager.WinForms
 {
     /// <summary>
-    /// Главная форма приложения для управления книгами
-    /// Предоставляет графический интерфейс для выполнения CRUD операций и бизнес-функций
+    /// Представление (View) в архитектуре MVP.
+    /// Форма отвечает только за отображение данных и генерацию событий
+    /// пользовательского интерфейса. Не содержит бизнес-логики.
+    /// Вся логика обработки запросов пользователя реализована в BookPresenter.
     /// </summary>
     public partial class Form1 : Form, IBookView
     {
+        /// <summary>
+        /// Событие вызывается при загрузке формы.
+        /// </summary>
         public event EventHandler? ViewLoaded;
+
+        /// <summary>
+        /// Событие вызывается, когда пользователь нажимает кнопку "Добавить".
+        /// </summary>
         public event EventHandler? AddBookRequested;
+
+        /// <summary>
+        /// Событие вызывается при запросе обновления выбранной книги.
+        /// </summary>
         public event EventHandler? UpdateBookRequested;
+
+        /// <summary>
+        /// Событие вызывается при удалении книги.
+        /// </summary>
         public event EventHandler? DeleteBookRequested;
+
+        /// <summary>
+        /// Событие вызывается для группировки книг по жанрам.
+        /// </summary>
         public event EventHandler? GroupByGenreRequested;
+
+        /// <summary>
+        /// Событие вызывается для поиска книг, опубликованных после указанного года.
+        /// </summary>
         public event EventHandler? FindBooksByYearRequested;
+
+        /// <summary>
+        /// Событие вызывается при смене выделенной строки в таблице.
+        /// </summary>
         public event EventHandler? SelectedBookChanged;
 
+        /// <summary>
+        /// Создаёт экземпляр формы представления.
+        /// Инициализирует компоненты UI. Логики не содержит.
+        /// </summary>
         public Form1()
         {
             InitializeComponent();
         }
+
+        /// <summary>
+        /// Заголовок книги, вводимый пользователем.
+        /// </summary>
         public string BookTitle
         {
             get => textBoxTitle.Text;
             set => textBoxTitle.Text = value;
         }
 
+        /// <summary>
+        /// Автор книги, вводимый пользователем.
+        /// </summary>
         public string BookAuthor
         {
             get => textBoxAuthor.Text;
             set => textBoxAuthor.Text = value;
         }
 
+        /// <summary>
+        /// Жанр книги, вводимый пользователем.
+        /// </summary>
         public string BookGenre
         {
             get => textBoxGenre.Text;
             set => textBoxGenre.Text = value;
         }
 
+        /// <summary>
+        /// Год издания книги, вводимый пользователем как строка.
+        /// Презентер выполняет валидацию и преобразование.
+        /// </summary>
         public string BookYearText
         {
             get => textBoxYear.Text;
             set => textBoxYear.Text = value;
         }
 
+        /// <summary>
+        /// Значение фильтра года для поиска книг.
+        /// </summary>
         public string YearFilterText
         {
             get => textBoxYearFilter.Text;
             set => textBoxYearFilter.Text = value;
         }
 
+        /// <summary>
+        /// Возвращает книгу, выбранную в таблице.
+        /// Если строка не выбрана — возвращает null.
+        /// </summary>
         public Book? SelectedBook
         {
             get
@@ -65,12 +119,20 @@ namespace BookManager.WinForms
             }
         }
 
+        /// <summary>
+        /// Отображает список книг в таблице.
+        /// Презентер вызывает этот метод после получения данных из модели.
+        /// </summary>
         public void ShowBooks(IList<Book> books)
         {
             dataGridViewBooks.DataSource = null;
             dataGridViewBooks.DataSource = books;
         }
 
+        /// <summary>
+        /// Отображает сгруппированный по жанрам список книг.
+        /// Используется презентером при выполнении группировки.
+        /// </summary>
         public void ShowBooksByGenre(Dictionary<string, List<Book>> booksByGenre)
         {
             listBoxGenres.Items.Clear();
@@ -84,6 +146,10 @@ namespace BookManager.WinForms
             }
         }
 
+        /// <summary>
+        /// Отображает список книг, опубликованных после указанного года.
+        /// Используется презентером при поиске.
+        /// </summary>
         public void ShowBooksAfterYear(IList<Book> books, int year)
         {
             listBoxYearResults.Items.Clear();
@@ -100,11 +166,18 @@ namespace BookManager.WinForms
             }
         }
 
+        /// <summary>
+        /// Отображает всплывающее сообщение пользователю.
+        /// </summary>
         public void ShowMessage(string message)
         {
             MessageBox.Show(message);
         }
 
+        /// <summary>
+        /// Очищает поля ввода книги.
+        /// Презентер вызывает этот метод после успешного добавления или удаления.
+        /// </summary>
         public void ClearBookInputFields()
         {
             textBoxTitle.Clear();
@@ -113,36 +186,60 @@ namespace BookManager.WinForms
             textBoxYear.Clear();
         }
 
+        /// <summary>
+        /// Обработчик загрузки формы.
+        /// Не содержит логики — только вызывает событие ViewLoaded.
+        /// </summary>
         private void Form1_Load(object sender, EventArgs e)
         {
             ViewLoaded?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Обработчик смены выделенной строки в таблице.
+        /// Генерирует событие SelectedBookChanged,
+        /// которое обрабатывается презентером.
+        /// </summary>
         private void dataGridViewBooks_SelectionChanged(object sender, EventArgs e)
         {
             SelectedBookChanged?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Генерирует событие AddBookRequested при нажатии кнопки "Добавить".
+        /// </summary>
         private void buttonAdd_Click(object sender, EventArgs e)
         {
             AddBookRequested?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Генерирует событие UpdateBookRequested при нажатии кнопки "Обновить".
+        /// </summary>
         private void buttonUpdate_Click(object sender, EventArgs e)
         {
             UpdateBookRequested?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Генерирует событие DeleteBookRequested при нажатии кнопки "Удалить".
+        /// </summary>
         private void buttonDelete_Click(object sender, EventArgs e)
         {
             DeleteBookRequested?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Генерирует событие GroupByGenreRequested для выполнения группировки.
+        /// </summary>
         private void buttonGroupByGenre_Click(object sender, EventArgs e)
         {
             GroupByGenreRequested?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Генерирует событие FindBooksByYearRequested для выполнения поиска.
+        /// </summary>
         private void buttonFindByYear_Click(object sender, EventArgs e)
         {
             FindBooksByYearRequested?.Invoke(this, EventArgs.Empty);
