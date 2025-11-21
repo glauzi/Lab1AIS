@@ -30,8 +30,6 @@
             // СОЗДАЕМ DI КОНТЕЙНЕР С ВЫБРАННОЙ КОНФИГУРАЦИЕЙ
             bool useEntityFramework = choiceorm != "2"; // true для EF, false для Dapper
             IKernel ninjectKernel = new StandardKernel(new SimpleConfigModule(useEntityFramework));
-
-            // ПОЛУЧАЕМ LOGIC ЧЕРЕЗ DI КОНТЕЙНЕР
             var bookService = ninjectKernel.Get<IBookService>();
 
             bool exitRequested = false;

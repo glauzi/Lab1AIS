@@ -34,7 +34,6 @@ namespace BookManager.WinForms
             bool useEntityFramework = result == DialogResult.Yes;
             IKernel ninjectKernel = new StandardKernel(new SimpleConfigModule(useEntityFramework));
 
-            // ПОЛУЧАЕМ LOGIC ЧЕРЕЗ DI КОНТЕЙНЕР
             _bookService = ninjectKernel.Get<IBookService>();
         }
         /// <summary>
