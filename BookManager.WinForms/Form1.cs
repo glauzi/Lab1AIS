@@ -108,12 +108,12 @@ namespace BookManager.WinForms
         /// Возвращает книгу, выбранную в таблице.
         /// Если строка не выбрана — возвращает null.
         /// </summary>
-        public Book? SelectedBook
+        public BookDto? SelectedBook
         {
             get
             {
                 if (dataGridViewBooks.SelectedRows.Count > 0)
-                    return dataGridViewBooks.SelectedRows[0].DataBoundItem as Book;
+                    return dataGridViewBooks.SelectedRows[0].DataBoundItem as BookDto;
 
                 return null;
             }
@@ -123,7 +123,7 @@ namespace BookManager.WinForms
         /// Отображает список книг в таблице.
         /// Презентер вызывает этот метод после получения данных из модели.
         /// </summary>
-        public void ShowBooks(IList<Book> books)
+        public void ShowBooks(IList<BookDto> books)
         {
             dataGridViewBooks.DataSource = null;
             dataGridViewBooks.DataSource = books;
@@ -133,7 +133,7 @@ namespace BookManager.WinForms
         /// Отображает сгруппированный по жанрам список книг.
         /// Используется презентером при выполнении группировки.
         /// </summary>
-        public void ShowBooksByGenre(Dictionary<string, List<Book>> booksByGenre)
+        public void ShowBooksByGenre(Dictionary<string, List<BookDto >> booksByGenre)
         {
             listBoxGenres.Items.Clear();
 
@@ -150,7 +150,7 @@ namespace BookManager.WinForms
         /// Отображает список книг, опубликованных после указанного года.
         /// Используется презентером при поиске.
         /// </summary>
-        public void ShowBooksAfterYear(IList<Book> books, int year)
+        public void ShowBooksAfterYear(IList<BookDto> books, int year)
         {
             listBoxYearResults.Items.Clear();
 
@@ -158,7 +158,7 @@ namespace BookManager.WinForms
             {
                 listBoxYearResults.Items.Add($"Книги после {year} года:");
                 foreach (var book in books)
-                    listBoxYearResults.Items.Add(book.ToString());
+                    listBoxYearResults.Items.Add($"{book.Title} — {book.Author} ({book.Genre}, {book.Year})");
             }
             else
             {
@@ -184,6 +184,62 @@ namespace BookManager.WinForms
             textBoxAuthor.Clear();
             textBoxGenre.Clear();
             textBoxYear.Clear();
+        }
+
+        /// <summary>
+        /// Пытается считать и провалидировать год издания книги из поля ввода.
+        /// В случае некорректного ввода показывает пользователю сообщение об ошибке.
+        /// </summary>
+        /// <param name="year">Считанное значение года при успешной валидации.</param>
+        /// <returns>
+        /// true, если год успешно считан и проходит валидацию;
+        /// false, если ввод некорректен или вне допустимого диапазона.
+        /// </returns>
+        public bool TryGetBookYear(out int year)
+        {
+            string yearText = BookYearText;
+
+            if (!int.TryParse(yearText, out year))
+            {
+                ShowMessage("Год должен быть числом!");
+                return false;
+            }
+
+            if (year < 0 || year > 2025)
+            {
+                ShowMessage("Год должен быть от 0 до 2025!");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Пытается считать и провалидировать год для фильтрации книг при поиске.
+        /// В случае некорректного ввода показывает пользователю сообщение об ошибке.
+        /// </summary>
+        /// <param name="year">Считанное значение года фильтра при успешной валидации.</param>
+        /// <returns>
+        /// true, если год успешно считан и проходит валидацию;
+        /// false, если ввод некорректен или вне допустимого диапазона.
+        /// </returns>
+        public bool TryGetFilterYear(out int year)
+        {
+            string yearText = YearFilterText;
+
+            if (!int.TryParse(yearText, out year))
+            {
+                ShowMessage("Введите корректный год для поиска!");
+                return false;
+            }
+
+            if (year < 0 || year > 2025)
+            {
+                ShowMessage("Год должен быть от 0 до 2025!");
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

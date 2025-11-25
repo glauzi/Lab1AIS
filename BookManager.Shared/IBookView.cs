@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BookManager.Entities;
+using BookManager.Shared;
 
 namespace BookManager.Shared
 {
@@ -50,7 +51,6 @@ namespace BookManager.Shared
         /// </summary>
         event EventHandler SelectedBookChanged;
 
-
         /// <summary>
         /// Название книги, введённое пользователем.
         /// </summary>
@@ -80,13 +80,13 @@ namespace BookManager.Shared
         /// Текущая выбранная книга (строка в таблице).
         /// Может быть null, если ничего не выбрано.
         /// </summary>
-        Book? SelectedBook { get; }
+        BookDto? SelectedBook { get; }
 
         /// <summary>
         /// Показать (перерисовать) полный список книг в основной таблице.
         /// </summary>
         /// <param name="books">Список книг для отображения.</param>
-        void ShowBooks(IList<Book> books);
+        void ShowBooks(IList<BookDto> books);
 
         /// <summary>
         /// Показать результат группировки книг по жанрам.
@@ -94,14 +94,14 @@ namespace BookManager.Shared
         /// <param name="booksByGenre">
         /// Словарь: ключ - жанр, значение - список книг этого жанра.
         /// </param>
-        void ShowBooksByGenre(Dictionary<string, List<Book>> booksByGenre);
+        void ShowBooksByGenre(Dictionary<string, List<BookDto>> booksByGenre);
 
         /// <summary>
         /// Показать результат поиска книг, изданных после указанного года.
         /// </summary>
         /// <param name="books">Список найденных книг.</param>
         /// <param name="year">Год, по которому выполнялась фильтрация.</param>
-        void ShowBooksAfterYear(IList<Book> books, int year);
+        void ShowBooksAfterYear(IList<BookDto> books, int year);
 
         /// <summary>
         /// Показать пользователю информационное сообщение (ошибка, успех и т.п.).
@@ -113,5 +113,21 @@ namespace BookManager.Shared
         /// Очистить поля ввода данных книги.
         /// </summary>
         void ClearBookInputFields();
+
+        /// <summary>
+        /// Пытается считать и провалидировать год издания книги из UI.
+        /// Возвращает true при успешной валидации, иначе false
+        /// и показывает пользователю сообщение об ошибке.
+        /// </summary>
+        /// <param name="year">Результат успешно считанного года.</param>
+        bool TryGetBookYear(out int year);
+
+        /// <summary>
+        /// Пытается считать и провалидировать год для фильтрации книг при поиске.
+        /// Возвращает true при успешной валидации, иначе false
+        /// и показывает пользователю сообщение об ошибке.
+        /// </summary>
+        /// <param name="year">Результат успешно считанного года фильтра.</param>
+        bool TryGetFilterYear(out int year);
     }
 }

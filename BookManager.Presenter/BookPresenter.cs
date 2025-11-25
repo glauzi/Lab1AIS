@@ -16,8 +16,17 @@ namespace BookManager.Presenter
     /// </summary>
     public class BookPresenter
     {
+        /// <summary>
+        /// Представление (View), с которым работает презентер.
+        /// Реализуется, например, формой WinForms.
+        /// </summary>
         private readonly IBookView _view;
+        /// <summary>
+        /// Сервис бизнес-логики для работы с книгами.
+        /// Инкапсулирует CRUD-операции и бизнес-функции.
+        /// </summary>
         private readonly IBookService _service;
+
 
         /// <summary>
         /// Создаёт новый экземпляр презентера и подписывается на события View.
@@ -40,15 +49,16 @@ namespace BookManager.Presenter
         }
 
         /// <summary>
-        /// Обработчик события загрузки View.
-        /// Загружает список всех книг и отображает их.
+        /// Обрабатывает событие загрузки представления.
+        /// Загружает список всех книг из модели, преобразует в DTO и передаёт во View.
         /// </summary>
         private void OnViewLoaded(object? sender, EventArgs e)
         {
             try
             {
                 var books = _service.GetAllBooks();
-                _view.ShowBooks(books);
+                var dtos = books.Select(ToDto).ToList();
+                _view.ShowBooks(dtos);
             }
             catch (Exception ex)
             {
@@ -57,37 +67,28 @@ namespace BookManager.Presenter
         }
 
         /// <summary>
-        /// Обработчик добавления книги.
-        /// Читает данные из View, валидирует, создаёт книгу через сервис и обновляет список.
+        /// Обрабатывает запрос на добавление новой книги.
+        /// Читает данные из View, запрашивает у View корректный год,
+        /// создаёт доменную сущность Book и передаёт её в сервис.
         /// </summary>
         private void OnAddBookRequested(object? sender, EventArgs e)
         {
             try
             {
-                // Читаем данные из View
                 string title = _view.BookTitle;
                 string author = _view.BookAuthor;
                 string genre = _view.BookGenre;
-                string yearText = _view.BookYearText;
 
-                if (!int.TryParse(yearText, out int year))
-                {
-                    _view.ShowMessage("Год должен быть числом!");
+                // Валидация и получение года полностью во View
+                if (!_view.TryGetBookYear(out int year))
                     return;
-                }
-
-                if (year < 0 || year > 2025)
-                {
-                    _view.ShowMessage("Год должен быть от 0 до 2025!");
-                    return;
-                }
 
                 var newBook = new Book(0, title, author, genre, year);
                 _service.CreateBook(newBook);
 
-                // Обновляем список и очищаем поля
                 var books = _service.GetAllBooks();
-                _view.ShowBooks(books);
+                var dtos = books.Select(ToDto).ToList();
+                _view.ShowBooks(dtos);
                 _view.ClearBookInputFields();
 
                 _view.ShowMessage("Книга успешно добавлена!");
@@ -99,41 +100,37 @@ namespace BookManager.Presenter
         }
 
         /// <summary>
-        /// Обработчик обновления книги.
+        /// Обрабатывает запрос на обновление выбранной книги.
+        /// Берёт выбранный DTO из View, применяет изменённые значения полей,
+        /// запрашивает корректный год у View и передаёт обновлённую сущность в сервис.
         /// </summary>
         private void OnUpdateBookRequested(object? sender, EventArgs e)
         {
             try
             {
-                var selectedBook = _view.SelectedBook;
-                if (selectedBook == null)
+                var selectedDto = _view.SelectedBook;
+                if (selectedDto == null)
                 {
                     _view.ShowMessage("Выберите книгу для обновления!");
                     return;
                 }
 
-                string title = _view.BookTitle;
-                string author = _view.BookAuthor;
-                string genre = _view.BookGenre;
-                string yearText = _view.BookYearText;
-
-                if (!int.TryParse(yearText, out int year))
-                {
-                    _view.ShowMessage("Год должен быть числом!");
+                if (!_view.TryGetBookYear(out int year))
                     return;
-                }
 
-                if (year < 0 || year > 2025)
-                {
-                    _view.ShowMessage("Год должен быть от 0 до 2025!");
-                    return;
-                }
+                // Собираем обновлённую доменную сущность
+                var updatedBook = new Book(
+                    selectedDto.Id,
+                    _view.BookTitle,
+                    _view.BookAuthor,
+                    _view.BookGenre,
+                    year);
 
-                var updatedBook = new Book(selectedBook.Id, title, author, genre, year);
                 _service.UpdateBook(updatedBook);
 
                 var books = _service.GetAllBooks();
-                _view.ShowBooks(books);
+                var dtos = books.Select(ToDto).ToList();
+                _view.ShowBooks(dtos);
 
                 _view.ShowMessage("Книга успешно обновлена!");
             }
@@ -144,24 +141,25 @@ namespace BookManager.Presenter
         }
 
         /// <summary>
-        /// Обработчик удаления книги.
+        /// Обрабатывает запрос на удаление выбранной книги.
+        /// Берёт выбранный DTO из View, удаляет соответствующую сущность по Id.
         /// </summary>
         private void OnDeleteBookRequested(object? sender, EventArgs e)
         {
             try
             {
-                var selectedBook = _view.SelectedBook;
-                if (selectedBook == null)
+                var selectedDto = _view.SelectedBook;
+                if (selectedDto == null)
                 {
                     _view.ShowMessage("Выберите книгу для удаления!");
                     return;
                 }
 
-                // Для упрощения: удаляем без подтверждения (подтверждение можно потом добавить в IBookView как отдельный метод).
-                _service.DeleteBookById(selectedBook.Id);
+                _service.DeleteBookById(selectedDto.Id);
 
                 var books = _service.GetAllBooks();
-                _view.ShowBooks(books);
+                var dtos = books.Select(ToDto).ToList();
+                _view.ShowBooks(dtos);
                 _view.ClearBookInputFields();
 
                 _view.ShowMessage("Книга успешно удалена!");
@@ -173,14 +171,21 @@ namespace BookManager.Presenter
         }
 
         /// <summary>
-        /// Обработчик группировки книг по жанрам.
+        /// Обрабатывает запрос на группировку книг по жанрам.
+        /// Получает данные из сервиса, преобразует в DTO и передаёт во View.
         /// </summary>
         private void OnGroupByGenreRequested(object? sender, EventArgs e)
         {
             try
             {
                 var booksByGenre = _service.GroupBooksByGenre();
-                _view.ShowBooksByGenre(booksByGenre);
+
+                var dtoDict = booksByGenre.ToDictionary(
+                    g => g.Key,
+                    g => g.Value.Select(ToDto).ToList()
+                );
+
+                _view.ShowBooksByGenre(dtoDict);
             }
             catch (Exception ex)
             {
@@ -188,23 +193,21 @@ namespace BookManager.Presenter
             }
         }
 
+
         /// <summary>
-        /// Обработчик поиска книг, изданных после указанного года.
+        /// Обрабатывает запрос на поиск книг, опубликованных после указанного года.
+        /// Год фильтра запрашивается и валидируется во View.
         /// </summary>
         private void OnFindBooksByYearRequested(object? sender, EventArgs e)
         {
             try
             {
-                string yearText = _view.YearFilterText;
-
-                if (!int.TryParse(yearText, out int year))
-                {
-                    _view.ShowMessage("Введите корректный год для поиска!");
+                if (!_view.TryGetFilterYear(out int year))
                     return;
-                }
 
                 var books = _service.FindBooksPublishedAfterYear(year);
-                _view.ShowBooksAfterYear(books, year);
+                var dtos = books.Select(ToDto).ToList();
+                _view.ShowBooksAfterYear(dtos, year);
             }
             catch (Exception ex)
             {
@@ -213,19 +216,39 @@ namespace BookManager.Presenter
         }
 
         /// <summary>
-        /// Обработчик смены выбранной книги.
-        /// Обновляет поля ввода данными выбранной книги.
+        /// Обрабатывает смену выбранной книги в представлении.
+        /// Копирует данные выбранного DTO в поля ввода View.
         /// </summary>
         private void OnSelectedBookChanged(object? sender, EventArgs e)
         {
-            var selectedBook = _view.SelectedBook;
-            if (selectedBook != null)
+            var selectedDto = _view.SelectedBook;
+            if (selectedDto != null)
             {
-                _view.BookTitle = selectedBook.Title;
-                _view.BookAuthor = selectedBook.Author;
-                _view.BookGenre = selectedBook.Genre;
-                _view.BookYearText = selectedBook.Year.ToString();
+                _view.BookTitle = selectedDto.Title;
+                _view.BookAuthor = selectedDto.Author;
+                _view.BookGenre = selectedDto.Genre;
+                _view.BookYearText = selectedDto.Year.ToString();
             }
         }
+
+        /// <summary>
+        /// Преобразует доменную сущность Book в DTO для передачи во View.
+        /// </summary>
+        private static BookDto ToDto(Book book) =>
+            new BookDto
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Author = book.Author,
+                Genre = book.Genre,
+                Year = book.Year
+            };
+
+        /// <summary>
+        /// Преобразует DTO-книги из View обратно в доменную сущность Book.
+        /// Может использоваться, если потребуется передавать изменения обратно в модель.
+        /// </summary>
+        private static Book FromDto(BookDto dto) =>
+            new Book(dto.Id, dto.Title, dto.Author, dto.Genre, dto.Year);
     }
 }
