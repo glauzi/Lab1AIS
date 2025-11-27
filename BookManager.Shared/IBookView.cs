@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BookManager.Entities;
 using BookManager.Shared;
 
 namespace BookManager.Shared
