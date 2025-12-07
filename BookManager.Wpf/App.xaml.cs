@@ -2,8 +2,8 @@
 using System.Windows;
 using Ninject;
 using BookManager.Core;
-using BookManager.Core.Services;          // пространство имён, где лежит SimpleConfigModule
-using BookManager.Presenter;     // BookViewModel
+using BookManager.Core.Services;
+using BookManager.Presenter;
 
 namespace BookManager.Wpf
 {
@@ -28,16 +28,14 @@ namespace BookManager.Wpf
 
             _kernel = CreateKernel();
 
-            // Берём сервис из Core — ниже лежащий слой.
+            // Берём сервис из Core
             var bookService = _kernel.Get<IBookService>();
 
-            // Создаём менеджер ViewModel (Presenter-слой).
-            var viewModelManager = new ViewModelManager(bookService);
+            // (1) Создаём ViewManager и передаём ему только сервис.
+            // ViewManager сам создаст ViewModelManager.
+            var viewManager = new ViewManager(bookService);
 
-            // Создаём менеджер View (WPF-слой) и передаём ему VMManager.
-            var viewManager = new ViewManager(viewModelManager);
-
-            // Запускаем цепочку ViewModelFirst.
+            // Запускаем цепочку ViewModelFirst
             viewManager.Run();
         }
 
