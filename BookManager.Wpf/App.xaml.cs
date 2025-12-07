@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Windows;
 using Ninject;
-using BookManager.Core;          // пространство имён, где лежит SimpleConfigModule
+using BookManager.Core;
+using BookManager.Core.Services;          // пространство имён, где лежит SimpleConfigModule
 using BookManager.Presenter;     // BookViewModel
 
 namespace BookManager.Wpf
@@ -19,38 +20,40 @@ namespace BookManager.Wpf
 
         /// <summary>
         /// Точка входа WPF-приложения.
-        /// Вызывается при старте (согласно атрибуту Startup в App.xaml).
+        /// Вариант ViewModelFirst: запуск через ViewManager и ViewModelManager.
         /// </summary>
-        /// <param name="e">Аргументы запуска приложения.</param>
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
             _kernel = CreateKernel();
 
-            var bookViewModel = _kernel.Get<BookViewModel>();
+            // Берём сервис из Core — ниже лежащий слой.
+            var bookService = _kernel.Get<IBookService>();
 
-            var mainWindow = new MainWindow
-            {
-                DataContext = bookViewModel
-            };
+            // Создаём менеджер ViewModel (Presenter-слой).
+            var viewModelManager = new ViewModelManager(bookService);
 
-            mainWindow.Show();
+            // Создаём менеджер View (WPF-слой) и передаём ему VMManager.
+            var viewManager = new ViewManager(viewModelManager);
+
+            // Запускаем цепочку ViewModelFirst.
+            viewManager.Run();
         }
 
         /// <summary>
         /// Создаёт и настраивает контейнер зависимостей Ninject.
-        /// Здесь подключаем модуль конфигурации из Core и регистрируем ViewModel.
+        /// Здесь подключаем модуль конфигурации из Core (DAL + BL).
         /// </summary>
         /// <returns>Инициализированный контейнер IKernel.</returns>
         private static IKernel CreateKernel()
         {
-
             bool useEntityFramework = true;
 
             var kernel = new StandardKernel(new SimpleConfigModule(useEntityFramework));
 
-            kernel.Bind<BookViewModel>().ToSelf().InSingletonScope();
+            // ВАЖНО: здесь НЕ биндируем BookViewModel и тем более ViewModelManager.
+            // Контейнер знает только про DAL/BL (репозитории, сервисы и т.п.).
 
             return kernel;
         }
