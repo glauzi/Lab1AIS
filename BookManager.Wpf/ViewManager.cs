@@ -1,49 +1,39 @@
-﻿using BookManager.Core.Services;
-using BookManager.Presenter;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using BookManager.Presenter;
 
 namespace BookManager.Wpf
 {
     /// <summary>
     /// Менеджер представлений (View).
-    /// В варианте ViewModelFirst сам создаёт менеджер ViewModel,
-    /// подписывается на его события и по типу ViewModel выбирает соответствующее окно.
+    /// Подписывается на события ViewModelManager и
+    /// управляет окнами WPF.
+    /// Работает только с ViewModel и View, без зависимостей от Core.
     /// </summary>
     public class ViewManager
     {
         private readonly ViewModelManager _viewModelManager;
 
         /// <summary>
-        /// Сопоставление типов ViewModel и фабрик окон (View),
-        /// позволяющее по типу VM создать нужное окно.
+        /// Сопоставление ViewModel и соответствующих им окон (View).
+        /// Позволяет по экземпляру VM найти и управлять её View.
         /// </summary>
-        private readonly Dictionary<Type, Func<BaseWindow>> _viewFactories =
-            new Dictionary<Type, Func<BaseWindow>>();
+        private readonly Dictionary<ViewModelBase, BaseWindow> _views =
+            new Dictionary<ViewModelBase, BaseWindow>();
 
         /// <summary>
         /// Создаёт новый экземпляр <see cref="ViewManager"/>.
         /// </summary>
-        /// <param name="bookService">
-        /// Сервис работы с книгами из слоя Core.
-        /// На его основе будет создан менеджер ViewModel.
+        /// <param name="viewModelManager">
+        /// Менеджер ViewModel, который создаёт и инициализирует VM.
         /// </param>
-        public ViewManager(IBookService bookService)
+        public ViewManager(ViewModelManager viewModelManager)
         {
-            if (bookService == null)
-                throw new ArgumentNullException(nameof(bookService));
+            _viewModelManager = viewModelManager
+                                ?? throw new ArgumentNullException(nameof(viewModelManager));
 
-            // (2) Здесь ViewManager сам создаёт VMManager
-            _viewModelManager = new ViewModelManager(bookService);
-
-            // Подписываемся на событие готовности основной ViewModel
+            // Подписываемся на событие создания основной ViewModel
             _viewModelManager.MainViewModelCreated += OnMainViewModelCreated;
-
-            // Регистрируем соответствия ViewModel -> View
-            ConfigureViewFactories();
         }
 
         /// <summary>
@@ -52,48 +42,28 @@ namespace BookManager.Wpf
         /// </summary>
         public void Run()
         {
-            // (1) Запуск цепочки: дальше управление перейдёт к ViewModelManager.
             _viewModelManager.Run();
         }
 
         /// <summary>
-        /// Настраивает сопоставления между ViewModel и View.
-        /// При необходимости здесь можно зарегистрировать несколько пар.
-        /// </summary>
-        private void ConfigureViewFactories()
-        {
-            // В нашей лабораторной одна главная VM: BookViewModel - MainWindow
-            _viewFactories[typeof(BookViewModel)] = () => new MainWindow();
-        }
-
-        /// <summary>
         /// Обработчик события создания основной ViewModel.
-        /// Здесь по типу ViewModel выбирается соответствующее окно,
-        /// создаётся экземпляр и запускается с переданным контекстом.
+        /// Здесь создаётся и отображается окно, соответствующее данной VM,
+        /// и регистрируется связь ViewModel -> View.
         /// </summary>
         /// <param name="viewModel">Готовая к работе ViewModel.</param>
         private void OnMainViewModelCreated(BookViewModel viewModel)
         {
-            var vmType = viewModel.GetType();
-
-            if (!_viewFactories.TryGetValue(vmType, out var viewFactory))
+            // Создаём окно для этой ViewModel
+            var mainWindow = new MainWindow
             {
-                var fallbackWindow = new MainWindow
-                {
-                    DataContext = viewModel
-                };
-                fallbackWindow.Show();
-                return;
-            }
+                DataContext = viewModel
+            };
 
-            // Создаём окно через фабрику
-            BaseWindow window = viewFactory();
+            // Регистрируем связь VM - View
+            _views[viewModel] = mainWindow;
 
-            // Передаём контекст ViewModel
-            window.DataContext = viewModel;
-
-            // Показываем окно
-            window.Show();
+            // Показываем окно пользователю
+            mainWindow.Show();
         }
     }
 }

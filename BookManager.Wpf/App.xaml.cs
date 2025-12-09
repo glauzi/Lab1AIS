@@ -8,34 +8,41 @@ using BookManager.Presenter;
 namespace BookManager.Wpf
 {
     /// <summary>
-    /// Логика взаимодействия для приложения WPF.
-    /// Здесь находится композиционный корень: настройка DI и запуск главного окна.
+    /// Класс приложения WPF.
+    /// Здесь находится композиционный корень: настройка DI
+    /// и запуск схемы ViewModelFirst через ViewModelManager и ViewManager.
     /// </summary>
     public partial class App : Application
     {
         /// <summary>
-        /// Контейнер зависимостей Ninject, доступный на время жизни приложения.
+        /// Контейнер зависимостей Ninject на время жизни приложения.
         /// </summary>
         private IKernel? _kernel;
 
         /// <summary>
         /// Точка входа WPF-приложения.
-        /// Вариант ViewModelFirst: запуск через ViewManager и ViewModelManager.
+        /// Вызывается при старте (согласно атрибуту Startup в App.xaml).
         /// </summary>
+        /// <param name="e">Аргументы запуска приложения.</param>
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
             _kernel = CreateKernel();
 
-            // Берём сервис из Core
+            // 1) Берём бизнес-логику из слоя Core.
             var bookService = _kernel.Get<IBookService>();
 
-            // (1) Создаём ViewManager и передаём ему только сервис.
-            // ViewManager сам создаст ViewModelManager.
-            var viewManager = new ViewManager(bookService);
+            // 2) Создаём главную ViewModel и передаём ей сервис.
+            var bookViewModel = new BookViewModel(bookService);
 
-            // Запускаем цепочку ViewModelFirst
+            // 3) Создаём менеджер ViewModel, который будет управлять этой VM.
+            var viewModelManager = new ViewModelManager(bookViewModel);
+
+            // 4) Создаём менеджер View, который подписывается на события VMManager.
+            var viewManager = new ViewManager(viewModelManager);
+
+            // 5) Запускаем цепочку ViewModelFirst.
             viewManager.Run();
         }
 
@@ -49,10 +56,6 @@ namespace BookManager.Wpf
             bool useEntityFramework = true;
 
             var kernel = new StandardKernel(new SimpleConfigModule(useEntityFramework));
-
-            // ВАЖНО: здесь НЕ биндируем BookViewModel и тем более ViewModelManager.
-            // Контейнер знает только про DAL/BL (репозитории, сервисы и т.п.).
-
             return kernel;
         }
 

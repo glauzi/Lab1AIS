@@ -1,50 +1,45 @@
-﻿using BookManager.Core.Services;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System;
 
 namespace BookManager.Presenter
 {
     /// <summary>
     /// Менеджер вью-моделей.
-    /// Отвечает за создание и инициализацию ViewModel
-    /// в варианте ViewModelFirst.
+    /// Отвечает за работу с основными ViewModel в варианте ViewModelFirst.
     /// </summary>
     public class ViewModelManager
     {
-        private readonly IBookService _bookService;
+        /// <summary>
+        /// Главная ViewModel приложения.
+        /// </summary>
+        private readonly BookViewModel _mainViewModel;
 
         /// <summary>
-        /// Событие, возникающее при создании и готовности
-        /// основной ViewModel приложения.
+        /// Событие, возникающее при готовности основной ViewModel.
+        /// View-слой (ViewManager) подписывается на это событие.
         /// </summary>
         public event Action<BookViewModel>? MainViewModelCreated;
 
         /// <summary>
         /// Создаёт новый экземпляр <see cref="ViewModelManager"/>.
         /// </summary>
-        /// <param name="bookService">Сервис работы с книгами.</param>
-        public ViewModelManager(IBookService bookService)
+        /// <param name="mainViewModel">Готовая к использованию ViewModel.</param>
+        public ViewModelManager(BookViewModel mainViewModel)
         {
-            _bookService = bookService ?? throw new ArgumentNullException(nameof(bookService));
+            _mainViewModel = mainViewModel
+                             ?? throw new ArgumentNullException(nameof(mainViewModel));
         }
 
         /// <summary>
         /// Точка старта менеджера ViewModel.
-        /// Создаёт основную ViewModel, подготавливает её к работе
-        /// и посылает событие для View-слоя.
+        /// Генерирует событие о готовности основной ViewModel.
         /// </summary>
         public void Run()
         {
-            // 3) Создаём главную VM. В конструкторе BookViewModel
-            // уже вызывается LoadBooks(), т.е. подготовка к работе идёт внутри.
-            var mainViewModel = new BookViewModel(_bookService);
-
-            // 4–5) Посылаем событие о готовности VM
-            // (ViewManager в WPF позже подпишется на это событие).
-            MainViewModelCreated?.Invoke(mainViewModel);
+            MainViewModelCreated?.Invoke(_mainViewModel);
         }
     }
 }
