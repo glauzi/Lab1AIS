@@ -14,6 +14,7 @@ namespace BookManager.Presenter
     /// </summary>
     public class BookViewModel : ViewModelBase
     {
+
         private readonly IBookService _bookService;
 
         /// <summary>

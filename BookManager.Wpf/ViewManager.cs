@@ -47,23 +47,39 @@ namespace BookManager.Wpf
 
         /// <summary>
         /// Обработчик события создания основной ViewModel.
-        /// Здесь создаётся и отображается окно, соответствующее данной VM,
-        /// и регистрируется связь ViewModel -> View.
+        /// Здесь создаётся (при необходимости) и отображается окно,
+        /// соответствующее данной VM, и регистрируется связь ViewModel - View.
         /// </summary>
         /// <param name="viewModel">Готовая к работе ViewModel.</param>
         private void OnMainViewModelCreated(BookViewModel viewModel)
         {
-            // Создаём окно для этой ViewModel
+            if (viewModel == null)
+                throw new ArgumentNullException(nameof(viewModel));
+
+            if (_views.TryGetValue(viewModel, out var existingWindow))
+            {
+                if (!existingWindow.IsVisible)
+                {
+                    existingWindow.Show();
+                }
+                else
+                {
+                    existingWindow.Activate();
+                }
+
+                return;
+            }
+
             var mainWindow = new MainWindow
             {
                 DataContext = viewModel
             };
 
-            // Регистрируем связь VM - View
             _views[viewModel] = mainWindow;
 
             // Показываем окно пользователю
             mainWindow.Show();
         }
+
     }
 }
